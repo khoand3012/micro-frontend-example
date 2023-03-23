@@ -1,14 +1,17 @@
-let resolveRemoteUrl;
+let resolveRemoteUrl = (remoteUrl) => {
+  return new Promise((resolve, reject) => {
+    resolve(remoteUrl);
+  });
+};
 let remoteModuleMap = new Map();
 let remoteContainerMap = new Map();
 let initialSharingScopeCreated = false;
-let remoteUrlDefinitions;
+let remoteUrlDefinitions = {};
 
 export function setRemoteUrlResolver(_resolveRemoteUrl) {
   resolveRemoteUrl = _resolveRemoteUrl;
 }
 export function setRemoteDefinitions(definitions) {
-  remoteUrlDefinitions = {}
   Object.keys(definitions).forEach(module => {
     let versions = Object.keys(module);
     for (let version of versions) {
