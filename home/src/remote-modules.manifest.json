@@ -8,7 +8,8 @@
         "v2": {
             "url": "http://localhost:3002",
             "author": "khoa.nguyen2@niteco.se",
-            "integrity": "sha512-aaeggererfgrf"
+            "integrity": "sha512-aaeggererfgrf",
+            "current": true
         }
     }
 }
