@@ -33,6 +33,14 @@ function ModuleLoader(props) {
 
   const Component = React.lazy(loadComponent(props.scope, props.module));
 
+  if (typeof props.moduleProps === 'object' && Object.keys(props.moduleProps).length > 0) {
+    return (
+      <Suspense fallback="Loading Module">
+        <Component {...props.moduleProps} />
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback="Loading Module">
       <Component />

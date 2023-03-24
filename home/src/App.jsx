@@ -27,6 +27,7 @@ function App() {
             url={remote.url}
             scope={remote.scope}
             module={remote.module}
+            moduleProps={{name: "Khoa!"}}
           />
         )}
       </React.Suspense>
