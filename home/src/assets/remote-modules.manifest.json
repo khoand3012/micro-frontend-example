@@ -1,0 +1,9 @@
+{
+  "header": {
+    "url": "http://localhost:3001/remoteEntry.js",
+    "author": "khoa.nguyen2@niteco.se",
+    "scope": "header",
+    "module": "./Header",
+    "integrity": "sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A=="
+  }
+}

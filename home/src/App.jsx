@@ -1,17 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-
 import "./index.scss";
-// import Header from "./Header";
-const Header = React.lazy(() => loadRemoteModule('header_v1', './Header'))
 import Footer from "./Footer";
-import { loadRemoteModule } from "./load-remote-modules";
+import ModuleLoader from "./ModuleLoader";
 
-const App = () => (
-  <div className="text-3xl mx-auto max-w-6xl">
-    <Header></Header>
-    <div>Page Content here!</div>
-    <Footer></Footer>
-  </div>
-);
+function App() {
+  const [remote, setRemote] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const remoteManifest = await import(
+        "./assets/remote-modules.manifest.json"
+      );
+      const headerManifest = remoteManifest["header"];
+      setRemote({
+        url: headerManifest.url,
+        scope: headerManifest.scope,
+        module: headerManifest.module,
+      });
+    })();
+  }, []);
+  return (
+    <div className="text-3xl mx-auto max-w-6xl">
+      <React.Suspense fallback={<div>Loading...</div>}>
+        {remote && (
+          <ModuleLoader
+            url={remote.url}
+            scope={remote.scope}
+            module={remote.module}
+          />
+        )}
+      </React.Suspense>
+      <div>Page Content here!</div>
+      <Footer></Footer>
+    </div>
+  );
+}
 ReactDOM.render(<App />, document.getElementById("app"));
