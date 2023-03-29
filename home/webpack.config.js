@@ -1,15 +1,19 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const path = require("path");
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 const deps = require("./package.json").dependencies;
 module.exports = {
   mode: "development",
-  entry: "./src/index",
+  entry: {
+    main: "./src/index",
+    json: "./src/JsonLoader"
+  },
 
   output: {
-    filename: "[name].bundle.js",
+    filename: "[name].chunk.js",
     path: path.resolve(__dirname, "dist"),
   },
 
@@ -56,6 +60,14 @@ module.exports = {
   },
 
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "src/assets/remote-modules.manifest.json",
+          to: path.resolve(__dirname, "dist/assets"),
+        },
+      ],
+    }),
     new CleanWebpackPlugin(),
     new ModuleFederationPlugin({
       name: "home",
@@ -83,17 +95,27 @@ module.exports = {
 
   optimization: {
     splitChunks: {
-      chunks: "all",
-      minSize: 0,
+      chunks: "async",
+      minSize: 10000,
       cacheGroups: {
-        data: {
-          test: /\.json$/,
-          filename: "[name].js",
-          name(module) {
-            const filename = module.rawRequest.replace(/^.*[\\/]/, "");
-            return filename.substring(0, filename.lastIndexOf("."));
-          },
+        defaultVendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,
+          reuseExistingChunk: true,
         },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+        // data: {
+        //   test: /\.json$/,
+        //   filename: "[name].json",
+        //   name(module) {
+        //     const filename = module.rawRequest.replace(/^.*[\\/]/, "");
+        //     return filename.substring(0, filename.lastIndexOf("."));
+        //   },
+        // },
       },
     },
   },

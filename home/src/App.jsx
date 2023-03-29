@@ -4,13 +4,15 @@ import "./index.scss";
 import Footer from "./Footer";
 import ModuleLoader from "./ModuleLoader";
 
-function App() {
+export default function App() {
   const [remote, setRemote] = useState(null);
   useEffect(() => {
     (async () => {
-      const remoteManifest = await import(
-        "./assets/remote-modules.manifest.json"
-      );
+      const remoteManifest = await fetch(
+        "http://localhost:3000/assets/remote-modules.manifest.json"
+      )
+        .then((response) => response.json())
+        .then((result) => result);
       const headerManifest = remoteManifest["header"];
       setRemote({
         url: headerManifest.url,
@@ -27,7 +29,7 @@ function App() {
             url={remote.url}
             scope={remote.scope}
             module={remote.module}
-            moduleProps={{name: "Khoa!"}}
+            moduleProps={{ name: "Khoa!" }}
           />
         )}
       </React.Suspense>
