@@ -3,17 +3,17 @@ const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPl
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const deps = require("./package.json").dependencies;
 module.exports = {
   mode: "development",
   entry: {
     main: "./src/index",
-    json: "./src/JsonLoader"
   },
 
   output: {
-    filename: "[name].chunk.js",
+    filename: "[name].[chunkhash].js",
     path: path.resolve(__dirname, "dist"),
   },
 
@@ -34,13 +34,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.m?js/,
-        type: "javascript/auto",
-        resolve: {
-          fullySpecified: false,
-        },
-      },
-      {
         test: /\.(css|s[ac]ss)$/i,
         use: ["style-loader", "css-loader", "postcss-loader"],
       },
@@ -60,6 +53,10 @@ module.exports = {
   },
 
   plugins: [
+    new UglifyJsPlugin({
+      cache: true,
+      parallel: true,
+    }),
     new CopyPlugin({
       patterns: [
         {
@@ -95,12 +92,28 @@ module.exports = {
 
   optimization: {
     splitChunks: {
-      chunks: "async",
-      minSize: 10000,
+      chunks: "all",
+      minSize: 15000,
+      maxAsyncRequests: 30,
+      maxInitialRequests: 30,
+      enforceSizeThreshold: 50000,
       cacheGroups: {
         defaultVendors: {
           test: /[\\/]node_modules[\\/]/,
-          priority: -10,
+          name(module, chunks, cacheGroupKey) {
+            const moduleFileName = module
+              .identifier()
+              .split(/\/|\\/)
+              .reduceRight((item) => item);
+            const allChunksNames = chunks
+              .map((item) => item.name && item.name.slice(0, 5))
+              .filter((item) => !!item)
+              .join("~");
+
+            return [cacheGroupKey, allChunksNames, moduleFileName]
+              .filter((value) => !!value)
+              .join("_");
+          },
           reuseExistingChunk: true,
         },
         default: {
@@ -108,14 +121,6 @@ module.exports = {
           priority: -20,
           reuseExistingChunk: true,
         },
-        // data: {
-        //   test: /\.json$/,
-        //   filename: "[name].json",
-        //   name(module) {
-        //     const filename = module.rawRequest.replace(/^.*[\\/]/, "");
-        //     return filename.substring(0, filename.lastIndexOf("."));
-        //   },
-        // },
       },
     },
   },

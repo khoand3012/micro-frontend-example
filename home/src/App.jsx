@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { useEffect, useState } from "react";
+import { render } from "react-dom";
 import "./index.scss";
 import Footer from "./Footer";
 import ModuleLoader from "./ModuleLoader";
@@ -36,4 +36,5 @@ export default function App() {
     </div>
   );
 }
-ReactDOM.render(<App />, document.getElementById("app"));
+
+render(<App />, document.getElementById("app"));
