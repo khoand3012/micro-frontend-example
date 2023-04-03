@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import useDynamicScript from "./useDynamicScript";
 
 function loadComponent(scope, module) {

@@ -2,22 +2,26 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const deps = require("./package.json").dependencies;
+
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: {
     main: "./src/index",
   },
 
   output: {
-    filename: "[name].[chunkhash].js",
+    filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "dist"),
+    publicPath: "",
   },
 
-  devtool: "inline-source-map",
+  devtool: false,
 
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
@@ -27,7 +31,7 @@ module.exports = {
     port: 3000,
     static: {
       directory: path.join(__dirname, "./dist"),
-      publicPath: "/dist",
+      publicPath: "/",
     },
   },
 
@@ -48,19 +52,23 @@ module.exports = {
       {
         test: /\.json$/,
         loader: "json-loader",
+        type: "javascript/auto",
       },
     ],
   },
 
   plugins: [
-    new UglifyJsPlugin({
-      cache: true,
-      parallel: true,
+    new MiniCssExtractPlugin({
+      filename: "[name].[chunkhash].css",
+      chunkFilename: "[id].[chunkhash].css",
     }),
-    new CopyPlugin({
+    new CopyWebpackPlugin({
       patterns: [
         {
-          from: "src/assets/remote-modules.manifest.json",
+          from: path.resolve(
+            __dirname,
+            "src/assets/remote-modules.manifest.json"
+          ),
           to: path.resolve(__dirname, "dist/assets"),
         },
       ],
@@ -87,10 +95,21 @@ module.exports = {
     }),
     new HtmlWebPackPlugin({
       template: "./src/index.html",
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+      },
     }),
   ],
 
   optimization: {
+    minimize: true,
+    minimizer: [
+      new CssMinimizerPlugin(),
+      new TerserPlugin({
+        parallel: true,
+      })
+    ],
     splitChunks: {
       chunks: "all",
       minSize: 15000,
